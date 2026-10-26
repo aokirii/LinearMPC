@@ -63,20 +63,21 @@ theta0   = theta_ref(idx0);
 %% --- Araç parametreleri ---
 L         = 2.7;
 lr        = 1.35;
-v_const   = 1.4;
+v_const   = 8;
 if isfield(cmp, 'v_const'), v_const = cmp.v_const; end   % run_compare hizi
 delta_max = deg2rad(30);
-ddelta_max_per_step = 1.5 * 0.02; 
+ddelta_rate_max = 1.5;   % direksiyon hiz siniri [rad/s]
 
 %% --- Sim parametreleri ---
 Ts       = 0.02;
 T_end    = 350;
 goal_tol = 1.0;
 n_laps = 3;
+ddelta_max_per_step = ddelta_rate_max * Ts;   % QP icin adim basina [rad]
 
 %% --- MPC ayarlari ---
 N_p = 60;
-Q   = diag([100, 120]);
+Q   = diag([70, 50]);
 R   = 15.0;
 nx  = 2;
 nu  = 1;
@@ -204,7 +205,7 @@ fprintf('Parametreler workspace''e yuklendi.\n');
 
 fprintf('\n=== MPC Setup tamamlandi ===\n');
 fprintf('Harita: %d nokta, ds_real = %.4f m\n', ref_path.N, ds_real);
-fprintf('MPC: N_p=%d, Q=diag([%g,%g]), R=%g\n', N_p, Q(1,1), Q(2,2), R);
+fprintf('MPC: N_p=%d, Q=diag(%s), R=%g\n', N_p, mat2str(diag(Q).'), R);
 fprintf('Rate limit: %.4f rad/adim (%.2f deg)\n', ...
         ddelta_max_per_step, rad2deg(ddelta_max_per_step));
 
