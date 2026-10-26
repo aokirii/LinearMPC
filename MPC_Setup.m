@@ -1,14 +1,24 @@
 
 clc; clear; close all;
 
+%% --- Karsilastirma on ayari (run_compare; etkilesimsiz, tek kullanimlik) ---
+cmp = getappdata(0, 'mpc_compare_cfg');
+if ~isempty(cmp), rmappdata(0, 'mpc_compare_cfg'); end
+
 %% --- Harita secimi ---
-choice = menu('Map sec', 'Circle', 'Rectangle', 'Hand Figure');
-map_dir = fullfile(fileparts(mfilename('fullpath')), 'maps');
-switch choice
-    case 1, run(fullfile(map_dir, 'YuvarlakMap.m'));
-    case 2, run(fullfile(map_dir, 'KareMap.m'));
-    case 3, run(fullfile(map_dir, 'HandFigureMap.m'));
-    otherwise, error('Secim yapilmadi.');
+if isempty(cmp)
+    choice = menu('Map sec', 'Circle', 'Rectangle', 'Hand Figure');
+    map_dir = fullfile(fileparts(mfilename('fullpath')), 'maps');
+    switch choice
+        case 1, run(fullfile(map_dir, 'YuvarlakMap.m'));
+        case 2, run(fullfile(map_dir, 'KareMap.m'));
+        case 3, run(fullfile(map_dir, 'HandFigureMap.m'));
+        otherwise, error('Secim yapilmadi.');
+    end
+else
+    waypoints = cmp.waypoints;   % yol run_compare tarafindan verildi
+    startPt   = cmp.startPt;
+    goal      = cmp.goal;
 end
 if ~exist('waypoints','var') || size(waypoints,2)~=2 || size(waypoints,1)<2
     error('waypoints bulunamadi veya format yanlis. Nx2 olmali.');
@@ -36,8 +46,8 @@ wpU = wp(ia,:);
 ds_target = 0.1;
 N_dense   = max(round(sU(end)/ds_target), 1500);
 s_dense   = linspace(0, sU(end), N_dense)';
-x_ref     = interp1(sU, wpU(:,1), s_dense, 'linear');
-y_ref     = interp1(sU, wpU(:,2), s_dense, 'linear');
+x_ref     = interp1(sU, wpU(:,1), s_dense, 'pchip');
+y_ref     = interp1(sU, wpU(:,2), s_dense, 'pchip');
 
 % GERCEK ds
 ds_real = s_dense(2) - s_dense(1);
@@ -54,6 +64,7 @@ theta0   = theta_ref(idx0);
 L         = 2.7;
 lr        = 1.35;
 v_const   = 1.4;
+if isfield(cmp, 'v_const'), v_const = cmp.v_const; end   % run_compare hizi
 delta_max = deg2rad(30);
 ddelta_max_per_step = 1.5 * 0.02; 
 
