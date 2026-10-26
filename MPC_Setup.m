@@ -3,10 +3,11 @@ clc; clear; close all;
 
 %% --- Harita secimi ---
 choice = menu('Map sec', 'Circle', 'Rectangle', 'Hand Figure');
+map_dir = fullfile(fileparts(mfilename('fullpath')), 'maps');
 switch choice
-    case 1, run('/Users/kasimesen/Desktop/Tasarım/2. Week/YuvarlakMap.m');
-    case 2, run('/Users/kasimesen/Desktop/Tasarım/2. Week/KareMap.m');
-    case 3, run('/Users/kasimesen/Desktop/Tasarım/2. Week/HandFigureMap.m');
+    case 1, run(fullfile(map_dir, 'YuvarlakMap.m'));
+    case 2, run(fullfile(map_dir, 'KareMap.m'));
+    case 3, run(fullfile(map_dir, 'HandFigureMap.m'));
     otherwise, error('Secim yapilmadi.');
 end
 if ~exist('waypoints','var') || size(waypoints,2)~=2 || size(waypoints,1)<2
@@ -71,7 +72,7 @@ nu  = 1;
 %% --- Hata modeli ---
 Ac = [0, v_const;
       0, 0];
-Bc = [0;
+Bc = [v_const*lr/L;      % CG referansi: beta ~ (lr/L)*delta
       v_const/L];
 Ec = [0;
      -v_const];
